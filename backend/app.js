@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const connectDB = require("./config/db");
 
 const logger = require("./middleware/loggerMiddleware");
 
@@ -14,10 +15,7 @@ app.use(logger);
 
 app.use(express.json());
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+connectDB();
 
 const appointmentRoutes = require("./routes/appointmentRoutes");
 

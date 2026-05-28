@@ -1,94 +1,78 @@
 const Appointment = require("../models/Appointment");
 
-const createAppointment = async (req, res) => {
+const createAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.create(req.body);
 
-    res.status(201).json({
-      message: "Appointment created successfully",
-      appointment,
-    });
+    res.status(201).json({ message: "Appointment created successfully", appointment });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-const getAppointments = async (req, res) => {
+const getAppointments = async (req, res, next) => {
   try {
-    const appointments = await Appointment.find();
+    const { service, status, date, sort } = req.query;
+
+    const queryObj = {};
+
+    if (service) queryObj.service = service;
+    if (status) queryObj.status = status;
+    if (date) queryObj.date = date;
+
+    let query = Appointment.find(queryObj);
+
+    if (sort) query = query.sort(sort);
+
+    const appointments = await query;
 
     res.status(200).json(appointments);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-const getAppointmentById = async (req, res) => {
+const getAppointmentById = async (req, res, next) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
 
     if (!appointment) {
-      return res.status(404).json({
-        message: "Appointment not found",
-      });
+      return res.status(404).json({ message: "Appointment not found" });
     }
 
     res.status(200).json(appointment);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-const updateAppointment = async (req, res) => {
+const updateAppointment = async (req, res, next) => {
   try {
-    const appointment = await Appointment.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-      }
-    );
+    const appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
 
     if (!appointment) {
-      return res.status(404).json({
-        message: "Appointment not found",
-      });
+      return res.status(404).json({ message: "Appointment not found" });
     }
 
-    res.status(200).json({
-      message: "Appointment updated successfully",
-      appointment,
-    });
+    res.status(200).json({ message: "Appointment updated successfully", appointment });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-const deleteAppointment = async (req, res) => {
+const deleteAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.findByIdAndDelete(req.params.id);
 
     if (!appointment) {
-      return res.status(404).json({
-        message: "Appointment not found",
-      });
+      return res.status(404).json({ message: "Appointment not found" });
     }
 
-    res.status(200).json({
-      message: "Appointment deleted successfully",
-    });
+    res.status(200).json({ message: "Appointment deleted successfully" });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    next(error);
   }
 };
 
